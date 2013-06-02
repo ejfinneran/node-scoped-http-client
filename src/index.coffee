@@ -36,8 +36,11 @@ class ScopedClient
       )
       if @options.timeout
         req.setTimeout @options.timeout, () ->
+          error = new Error('connection timed out')
+          error.code = 'ETIMEOUT'
+          req.emit 'error', error
+          req._hadError = true
           req.abort()
-
       if callback
         req.on 'error', callback
       req.write reqBody, @options.encoding if sendingData
